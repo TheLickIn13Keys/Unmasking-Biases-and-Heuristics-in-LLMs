@@ -3,14 +3,14 @@ import json
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import matplotlib.pyplot as plt
 import torch
-
+import numpy as np
 print(os.getcwd())
 dataset = []
 file_path = './content/LLMHeuristicReHEAT/test_cases_0320.jsonl'
 with open(file_path, 'r') as file:
     for line in file:
         dataset.append(json.loads(line))
-
+#TODO try all test cases
 print(dataset[0])  # Check the first entry
 
 tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B")
@@ -32,11 +32,14 @@ with torch.no_grad():
 if outputs.attentions is not None:
     attentions = outputs.attentions
     
+
     layer = 0  # First layer (0-indexed)
     head = 0   # First head (0-indexed)
-
+    #TODO export to file
     attention_matrix = attentions[layer][0, head].detach().numpy()  # (seq_len, seq_len)
 
+    np.fill_diagonal(attention_matrix, 0)
+    plt.figure(figsize=(10,8))
     plt.imshow(attention_matrix, cmap='viridis')
     plt.title(f"Layer {layer + 1}, Head {head + 1}")
     plt.xlabel("Key Position")
